@@ -67,40 +67,17 @@ struct FHierarchicalLayer
 				Rows.RemoveAt(Result.StartIdx);
 			}
 
+			// The problem is here!
 			Rows.Insert(SplitRows.All(), Result.StartIdx);
-
-			BlockId = -1;
-
-			const auto Offset = SplitRows.Before.IsSet() ? 1 : 0;
-			Row = &Rows[Result.StartIdx + Offset];
+			// The problem is here!
+			
+			// BlockId = -1;
+			//
+			// const auto Offset = SplitRows.Before.IsSet() ? 1 : 0;
+			// Row = &Rows[Result.StartIdx + Offset];
 		}
 
-		Row->Set(InBlockId, Y);
-	}
-
-	void CascadeMinimalMergeStartingFrom(const uint8 X)
-	{
-		auto Result = FindRow(X);
-		checkf(Result.Found, TEXT("Row not found"));
-
-		FHierarchicalRow* Row = Result.DataPtr ? Result.DataPtr : Result.Data.GetPtrOrNull();
-
-		Row->CascadeMinimalMerge();
-
-		if (Row->IsUniform())
-		{
-			auto Merged = FHierarchicalRow::MergeRows(Rows);
-
-			if (Merged.Num() == 1)
-			{
-				BlockId = Merged[0].BlockId;
-				Rows.Empty();
-			}
-			else
-			{
-				Rows = MoveTemp(Merged);
-			}
-		}
+		// Row->Set(InBlockId, Y);
 	}
 
 	TSplit<FHierarchicalLayer> Split(const uint8 At,

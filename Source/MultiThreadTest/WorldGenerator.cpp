@@ -35,15 +35,9 @@ void UWorldGenerator::Generate(FIntVector2 ChunkPos, TArray<FHierarchicalGrid>& 
 				for (int Z = 0; Z < MaxHeightInThisChunk; Z++)
 				{
 					SCOPE_CYCLE_COUNTER(STAT_GenerateChunkSet);
-					OutChunkData[ChunkZ].Set(X, Y, Z, 1, false);
+					OutChunkData[ChunkZ].Set(X, Y, Z, 1);
 				}
 			}
 		}
-	}
-
-	// Merge all
-	for (int Z = 0; Z < FGameConstants::ChunksInZ; Z++)
-	{
-		OutChunkData[Z].FullMerge();
 	}
 }

@@ -82,23 +82,6 @@ struct FHierarchicalRow
 		Col->BlockId = InBlockId;
 	}
 
-	void CascadeMinimalMerge()
-	{
-		checkf(!IsUniform(), TEXT("Row shouldn't be uniform"));
-
-		auto Merged = FHierarchicalCol::MergeCols(Cols);
-
-		if (Merged.Num() == 1)
-		{
-			BlockId = Merged[0].BlockId;
-			Cols.Empty();
-		}
-		else
-		{
-			Cols = MoveTemp(Merged);
-		}
-	}
-
 	// TODO extremely similar to other finds, unify?
 	TFindResult<FHierarchicalCol> FindCol(const uint8 Y)
 	{
@@ -188,62 +171,5 @@ struct FHierarchicalRow
 		}
 
 		return 0;
-	}
-
-	static TArray<FHierarchicalRow> MergeRows(TArray<FHierarchicalRow>& Rows)
-	{
-		if (Rows.Num() == 0)
-		{
-			return {};
-		}
-
-		const auto Resolution = Rows[0].Resolution;
-		TArray<FHierarchicalRow> MergedRows;
-
-		uint32 LastBlockId = -1;
-		uint8 LastSize = 0;
-
-		for (int RowIdx = 0; RowIdx < Rows.Num(); RowIdx++)
-		{
-			auto& Row = Rows[RowIdx];
-
-			if (Row.IsUniform())
-			{
-				if (LastBlockId == -1)
-				{
-					LastBlockId = Row.BlockId;
-				}
-
-				if (Row.BlockId == LastBlockId)
-				{
-					LastSize += Row.Span;
-				}
-				else
-				{
-					MergedRows.Add(FHierarchicalRow{LastSize, LastBlockId, Resolution});
-					LastBlockId = Row.BlockId;
-					LastSize = Row.Span;
-				}
-			}
-			else
-			{
-				if (LastSize != 0 && LastBlockId != -1)
-				{
-					MergedRows.Add(FHierarchicalRow{LastSize, LastBlockId, Resolution});
-					LastBlockId = -1;
-					LastSize = 0;
-				}
-
-				MergedRows.Add(MoveTemp(Row));
-			}
-
-			// Is Last, add accumulated
-			if (RowIdx == Rows.Num() - 1)
-			{
-				MergedRows.Add(FHierarchicalRow{LastSize, LastBlockId, Resolution});
-			}
-		}
-
-		return MergedRows;
 	}
 };
